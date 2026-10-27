@@ -33,28 +33,34 @@ Groups of 5 add a **security & privacy officer** (role card X). In groups of 3, 
 
 ## 3. Record the decision (8 min, together)
 
-**ADR reviewed:** `docs/adr/0002-…` by …
-**Board members and roles:** …
+**ADR reviewed:** `docs/adr/0002-use-rabbitmq-for-post-order-events.md` by Theerayut Attajak
+**Board members and roles:** Solo roleplay, allowed by the professor. Theerayut Attajak: architect (rehearsal and PO round). Claude Code (Claude Opus 5.5): AI analyst (read out `exercise/outputs/3-review.md`), product owner (card P) and SRE (card S). The student read the role cards and relayed them to Claude after the AI review was finished. In the SRE round the architect was played by a separate Claude subagent that saw only the ADR, the AI review, the scenario and what the SRE said aloud; the student reviewed its answers.
 
 **Decision:** accept / accept with changes / reject
 
 **Required changes:**
-1. …
-2. …
-3. …
+1. **Points display for the printed campaign:** the confirmation page computes and shows the new points total immediately; `loyaltyservice` credits them asynchronously, exactly once. Display and award ship together for 11.11. Refunds publish `OrderRefunded` and reverse the points (ledger entries, de-dup on order ID).
+2. **Ship only what can be ready in 3 weeks:** RabbitMQ + MailFast consumer + `loyaltyservice` for the sale, with direct publish and publisher confirms; outbox, analytics and refunds after the sale. Add an Operations section (named owner, paging alerts, dashboards, backups, runbook) as a go/no-go gate; request budget for a 3-node broker now, with a single durable node + post-sale reconciliation as the accepted fallback.
+3. **Make failures visible and recoverable:** circuit breaker on MailFast so an outage pauses the consumer instead of filling the DLQ; DLQ only for poison messages, with documented replay; order ID + trace context on every event and log line so support can trace "I never got my email". Plus end-to-end idempotency (key per checkout attempt, so a retry can't double-charge or double-award).
 
 **Who raised what?** List every concern the board discussed.
 
 | # | Concern | Raised by (AI review / architect / PO / SRE / security) | Was it in the AI's review? | Could the AI have known? Why or why not? |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
+| 1 | Marketing already printed "see your points the moment you order", but points arrive within a minute | PO | No | No: the campaign isn't in the scenario or the ADR |
+| 2 | Points are worth money (100 = 10 THB); refunds must reverse them | PO | No | No: the value of points and refunds aren't in the scenario |
+| 3 | The sale is in 3 weeks; everything must be built and load-tested by then | PO | No | No: the date isn't in the scenario |
+| 4 | Fraud scoring must cancel an order before confirmation | PO (architect had flagged it at ADR line 113) | No | Partly: the ADR raised the question, but "must cancel" is the PO's knowledge |
+| 5 | Nobody has run a broker in production ("used RabbitMQ" = laptops only); on-call is 2 people | SRE | Partly: the review noted RabbitMQ ownership was open | No: the scenario says two developers "have used RabbitMQ", which the AI reasonably took as relevant experience |
+| 6 | Ops rule: each new stateful component needs dashboards, alerting, backups and a runbook (~1 week) | SRE | Partly: the review noted checkout becomes stateful | No: an internal ops policy, not written anywhere the AI read |
+| 7 | Cluster near node limit; a 3-node HA broker needs 2-week budget approval | SRE | No | No: infrastructure capacity and budget process aren't documented |
+| 8 | Last 11.11 a 20-minute email outage went unnoticed; what happens to stuck messages, replay, DLQ? | SRE | Partly: DLQ and retries were in the ADR; the review didn't test a long provider outage | No: last year's incident isn't in the scenario |
+| 9 | Tracing one order across the async boundary when a customer says "no email" | SRE | No | Yes in principle: observability is a standard async concern the review could have raised |
+| 10 | A retried `PlaceOrder` gets a new order ID: double points (and a double charge) | AI review | Yes (points only) | Yes: visible from the ADR; the double charge needs `checkoutservice/main.go` |
 
-**The AI's best finding** (one the humans had missed): …
-**The AI's weakest finding** (generic, wrong or irrelevant): …
+
+**The AI's best finding** (one the humans had missed): a retried `PlaceOrder` creates a new order ID, so the order-ID de-dup doesn't stop double loyalty points. The architect had only considered broker redelivery.
+**The AI's weakest finding** (generic, wrong or irrelevant): it treated the "two developers have used RabbitMQ" fact as a strength (Non-risk: "fits … the two developers' experience"), when in reality it was laptop-only experience. That isn't the AI's fault, but it shows a plausible-sounding finding resting on an unchecked fact.
 
 ## 4. Individual reflection (≤ 150 words, each student, after class is fine)
 
