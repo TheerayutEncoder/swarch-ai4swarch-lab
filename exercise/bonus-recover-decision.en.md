@@ -35,6 +35,16 @@ Choose **five** claims from the agent's table: at least two it marked *Evidenced
 
 ## Reflect
 
-1. **Guess labelled Evidenced?** Yes, twice: #16 ("every hop") and #21 ("all 6"). Both are over-generalisations whose counter-example sits in the agent's *own* table (#24, #23). The facts were right; the word "all/every" was the guess.
-2. **Wrong belief a new developer could form:** the title says "all services communicate synchronously over gRPC", but `frontend` POSTs to `shoppingassistantservice` over **HTTP** (`src/frontend/handlers.go:464`, outside the evidence). The agent flagged the gap (#10) but the ADR's decision still reads as universal. Or: "tracing works end to end", when currency calls drop the trace.
-3. **Code vs original architects:** code shows *what* (one proto, unary calls, sequential checkout, no deadlines). Only the architects know *why*: e.g. #13, was gRPC chosen for multi-language interop, for a demo of gRPC tooling, or for performance? The agent rightly left every "why" as Inferred.
+1. Did the agent ever label a guess as *Evidenced*? Give an example, or explain how you checked that it didn't.
+
+   Yes, twice. Claim #16 says tracing works on every gRPC hop, but `convertCurrency` uses `context.TODO()` (`checkoutservice/main.go:360`), so that call loses the trace. Claim #21 says checkout depends on all 6 services, but an email failure is only logged (`main.go:273-277`), so it is really 5. In both cases the agent's own table (#24 and #23) already contained the counter-example.
+
+2. A new developer reads only this reconstructed ADR. What wrong belief could they form?
+
+   They could believe that every service talks over gRPC. In fact `frontend` calls `shoppingassistantservice` over HTTP (`src/frontend/handlers.go:464`). The agent noticed the address was not a gRPC connection (#10), but the ADR's title and decision still say "all services".
+
+3. What can AI recover from code, and what can only the original architects know? Use one example from your ADR.
+
+   From code, the AI could recover what the system does: one shared proto, only unary calls, a sequential checkout and no deadlines. It could not recover why. For example, #13 says gRPC was chosen for multi-language support, but it could also have been chosen to show off gRPC in a demo or for performance. Only the original architects know, and the agent was right to mark every "why" as Inferred.
+
+_Answers drafted with Claude (Opus 5.5) and reviewed by me._
