@@ -36,7 +36,7 @@ Groups of 5 add a **security & privacy officer** (role card X). In groups of 3, 
 **ADR reviewed:** `docs/adr/0002-use-rabbitmq-for-post-order-events.md` by Theerayut Attajak
 **Board members and roles:** Solo roleplay, allowed by the professor. Theerayut Attajak: architect (rehearsal and PO round). Claude Code (Claude Opus 5.5): AI analyst (read out `exercise/outputs/3-review.md`), product owner (card P) and SRE (card S). The student read the role cards and relayed them to Claude after the AI review was finished. In the SRE round the architect was played by a separate Claude subagent that saw only the ADR, the AI review, the scenario and what the SRE said aloud; the student reviewed its answers.
 
-**Decision:** accept / accept with changes / reject
+**Decision:** accept with changes
 
 **Required changes:**
 1. **Points display for the printed campaign:** the confirmation page computes and shows the new points total immediately; `loyaltyservice` credits them asynchronously, exactly once. Display and award ship together for 11.11. Refunds publish `OrderRefunded` and reverse the points (ledger entries, de-dup on order ID).
