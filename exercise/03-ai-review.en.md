@@ -17,4 +17,4 @@ The agent writes a one-page ATAM-style review to [`outputs/3-review.md`](outputs
 
 **Don't act on the review yet.** Read it, commit it, and bring it to the review board in Part B. The board will decide which of its findings matter.
 
-- **My first impression of the AI's review** (one sentence): …
+- **My first impression of the AI's review** (one sentence): The AI review was a mix: about half of its findings repeated risks I had already admitted in the ADR, but it also caught real gaps I had missed, like duplicate points when a client retries PlaceOrder.
