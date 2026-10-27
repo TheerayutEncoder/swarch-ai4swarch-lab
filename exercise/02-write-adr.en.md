@@ -33,10 +33,10 @@ requirement: <paste R-12 here>
 
 | Criterion | Run a | Run b |
 |---|---|---|
-| Uses scenario numbers? | No; every missing fact listed under Open questions | Yes: 500 ms, 200 orders/s, MailFast p95 1.5 s / p99 8 s / 0.5 % / 50/s |
-| Options | direct sync calls; event + broker (chosen); post-order orchestrator | sync gRPC; goroutines in checkout; RabbitMQ (chosen); Kafka |
-| Exactly-once points / MailFast limit | generic: idempotent consumers, outbox, DLQ; no rate-limit knowledge | order ID as idempotency key; email consumer ≤ 50/s with retries + DLQ |
-| Invented anything? | none found; current-system guesses labelled [Assumption] | verify: `main.go` line refs (111–123, 233, 252–277, 273–277) |
+| Uses the scenario's numbers (latency, peak, MailFast limits)? | No; every missing fact listed under Open questions | Yes: 500 ms, 200 orders/s, MailFast p95 1.5 s / p99 8 s / 0.5 % / 50/s |
+| Options considered | direct sync calls; event + broker (chosen); post-order orchestrator | sync gRPC; goroutines in checkout; RabbitMQ (chosen); Kafka |
+| Handles "exactly once" loyalty points and MailFast's rate limit? How? | generic: idempotent consumers, outbox, DLQ; no rate-limit knowledge | order ID as idempotency key; email consumer ≤ 50/s with retries + DLQ |
+| Anything invented (a number, tool or fact not in the scenario)? | none found; current-system guesses labelled [Assumption] | Yes: the "no lost emails" driver isn't in the scenario, and it claimed the cart "is emptied" although `main.go` line 263 ignores the `emptyUserCart` error (both found by the Codex fact-check) |
 
 ## Take ownership: your final ADR
 
